@@ -1,0 +1,29 @@
+Skrip untuk screen recording - Galeri Foto (durasi ~4-6 menit)
+--- Opening (10-15s)
+1. Slide judul: "Website Galeri Foto - Demo"
+2. Perkenalan singkat: nama, tujuan (menunjukkan fitur: upload, kategori, pagination, search, lightbox, admin)
+
+--- Instalasi singkat (30-45s)
+1. Tunjukkan folder project di Laragon: C:/laragon/www/galeri-foto
+2. Buka phpMyAdmin -> import database.sql
+3. Jalankan setup_admin.php sekali untuk membuat user admin (username: admin, password: admin123)
+4. Pastikan folder assets/uploads dapat ditulis
+
+--- Demo Fitur - Publik (60-90s)
+1. Buka http://localhost/galeri-foto/index.php
+2. Tunjukkan pagination - pindah halaman
+3. Gunakan kolom pencarian untuk mencari judul foto
+4. Filter berdasarkan kategori
+5. Klik gambar -> tampilkan lightbox (modal) besar
+
+--- Demo Fitur - Admin (90-120s)
+1. Buka /login.php -> login sebagai admin
+2. Menu Dashboard: lihat statistik (foto, kategori, users)
+3. Upload foto baru (tunjukkan upload, pilih file, pilih kategori, submit)
+4. Edit foto (ganti judul/kategori/ganti file)
+5. Hapus foto
+6. Kelola kategori: tambah & hapus kategori
+
+--- Penutup (10-15s)
+1. Rekomendasi pengembangan: thumbnail generation, CSRF, user management, pagination yang di-improve
+2. Info kontak / catatan lisensi (jika perlu)
