@@ -1,5 +1,9 @@
 <?php
 require_once 'inc/functions.php';
+
+// cek user login
+$user = current_user();
+
 $pdo = db_connect();
 
 $q = isset($_GET['q']) ? trim($_GET['q']) : '';
@@ -26,16 +30,21 @@ $countStmt = $pdo->prepare("SELECT COUNT(*) FROM photos p $whereSql");
 $countStmt->execute($params);
 $total = $countStmt->fetchColumn();
 
-$sql = "SELECT p.*, c.name as category FROM photos p LEFT JOIN categories c ON p.category_id = c.id $whereSql ORDER BY p.uploaded_at DESC LIMIT :lim OFFSET :off";
+$sql = "SELECT p.*, c.name as category 
+        FROM photos p 
+        LEFT JOIN categories c ON p.category_id = c.id 
+        $whereSql 
+        ORDER BY p.uploaded_at DESC 
+        LIMIT :lim OFFSET :off";
 $stmt = $pdo->prepare($sql);
-foreach ($params as $k=>$v) $stmt->bindValue(':' . $k, $v);
+foreach ($params as $k => $v) $stmt->bindValue(':' . $k, $v);
 $stmt->bindValue(':lim', (int)$perPage, PDO::PARAM_INT);
 $stmt->bindValue(':off', (int)$offset, PDO::PARAM_INT);
 $stmt->execute();
 $photos = $stmt->fetchAll();
 
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name")->fetchAll();
-$extraQuery = http_build_query(array_filter(['q'=>$q, 'category'=>$category]));
+$extraQuery = http_build_query(array_filter(['q' => $q, 'category' => $category]));
 ?>
 <!doctype html>
 <html lang="en">
@@ -49,7 +58,15 @@ $extraQuery = http_build_query(array_filter(['q'=>$q, 'category'=>$category]));
   <div class="container">
     <a class="navbar-brand" href="<?= BASE_URL ?>/index.php">Galeri Foto</a>
     <div>
-      <a class="btn btn-sm btn-primary" href="<?= BASE_URL ?>/login.php">Admin</a>
+      <?php if ($user): ?>
+  <span class="me-2">👋 <?= h($user['username']) ?></span>
+  <?php if ($user['role'] === 'admin'): ?>
+    <a class="btn btn-sm btn-primary" href="<?= BASE_URL ?>/admin/dashboard.php">Dashboard</a>
+  <?php endif; ?>
+  <a class="btn btn-sm btn-danger" href="<?= BASE_URL ?>/logout.php">Logout</a>
+<?php else: ?>
+  <a class="btn btn-sm btn-primary" href="<?= BASE_URL ?>/login.php">Login Admin</a>
+<?php endif; ?>
     </div>
   </div>
 </nav>
@@ -65,7 +82,9 @@ $extraQuery = http_build_query(array_filter(['q'=>$q, 'category'=>$category]));
         <select name="category" class="form-select form-select-sm me-2">
           <option value="">Semua Kategori</option>
           <?php foreach($categories as $cat): ?>
-            <option value="<?= $cat['id'] ?>" <?= ($category==$cat['id'])?'selected':'' ?>><?= h($cat['name']) ?></option>
+            <option value="<?= $cat['id'] ?>" <?= ($category==$cat['id'])?'selected':'' ?>>
+              <?= h($cat['name']) ?>
+            </option>
           <?php endforeach; ?>
         </select>
         <button class="btn btn-sm btn-outline-secondary">Cari</button>
@@ -75,18 +94,29 @@ $extraQuery = http_build_query(array_filter(['q'=>$q, 'category'=>$category]));
 
   <div class="row g-3">
     <?php if (count($photos) === 0): ?>
-      <div class="col-12"><div class="alert alert-info">Belum ada foto.</div></div>
+      <div class="col-12">
+        <div class="alert alert-info">Belum ada foto.</div>
+      </div>
     <?php endif; ?>
 
     <?php foreach($photos as $p): ?>
       <div class="col-6 col-md-4 col-lg-3">
-        <div class="card">
-          <a href="#" data-bs-toggle="modal" data-bs-target="#lightboxModal" data-src="<?= BASE_URL ?>/assets/uploads/<?= h($p['filename']) ?>" data-title="<?= h($p['title']) ?>">
-            <img src="<?= BASE_URL ?>/assets/uploads/<?= h($p['filename']) ?>" class="card-img-top" style="height:200px;object-fit:cover">
+        <div class="card shadow-sm">
+          <a href="#"
+             data-bs-toggle="modal"
+             data-bs-target="#lightboxModal"
+             data-src="<?= BASE_URL ?>/assets/uploads/<?= h($p['filename']) ?>"
+             data-title="<?= h($p['title']) ?>"
+             data-file="<?= urlencode($p['filename']) ?>">
+            <img src="<?= BASE_URL ?>/assets/uploads/<?= h($p['filename']) ?>"
+                 class="card-img-top"
+                 style="height:200px;object-fit:cover">
           </a>
           <div class="card-body p-2">
-            <h6 class="card-title mb-1"><?= h($p['title'] ?: 'Untitled')?></h6>
-            <small class="text-muted"><?= h($p['category'] ?? '—') ?> • <?= date('d M Y', strtotime($p['uploaded_at'])) ?></small>
+            <h6 class="card-title mb-1"><?= h($p['title'] ?: 'Untitled') ?></h6>
+            <small class="text-muted">
+              <?= h($p['category'] ?? '—') ?> • <?= date('d M Y', strtotime($p['uploaded_at'])) ?>
+            </small>
           </div>
         </div>
       </div>
@@ -108,11 +138,10 @@ $extraQuery = http_build_query(array_filter(['q'=>$q, 'category'=>$category]));
         <img id="lightboxImage" src="" style="width:100%;height:auto;display:block">
       </div>
       <div class="modal-footer">
-      <h6 id="lightboxTitle" class="me-auto"></h6>
-      <a href="download.php?file=<?= urlencode($p['filename']) ?>" class="btn btn-success btn-sm mt-2">Download</a>
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-    </div>
-
+        <h6 id="lightboxTitle" class="me-auto"></h6>
+        <a id="downloadLink" href="#" class="btn btn-success btn-sm mt-2">Download</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
     </div>
   </div>
 </div>
@@ -124,8 +153,11 @@ $extraQuery = http_build_query(array_filter(['q'=>$q, 'category'=>$category]));
     var trigger = event.relatedTarget;
     var src = trigger.getAttribute('data-src');
     var title = trigger.getAttribute('data-title');
+    var file = trigger.getAttribute('data-file');
+
     document.getElementById('lightboxImage').src = src;
     document.getElementById('lightboxTitle').textContent = title || '';
+    document.getElementById('downloadLink').href = "download.php?file=" + file;
   });
 </script>
 </body>

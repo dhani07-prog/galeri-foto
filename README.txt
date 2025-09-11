@@ -13,3 +13,4 @@ Petunjuk singkat:
    - Pagination (12 item per halaman).
    - Lightbox menggunakan Bootstrap Modal.
    - Simple user roles (role di tabel users). Default admin dibuat lewat setup_admin.php.
+   - Di halaman publik ada fitur download .

@@ -2,6 +2,11 @@
 // inc/functions.php
 require_once __DIR__ . '/../config.php';
 
+// Mulai session kalau belum dimulai
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 function db_connect() {
     static $pdo = null;
     if ($pdo === null) {
@@ -9,8 +14,13 @@ function db_connect() {
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
         ];
-        $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+        try {
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+        } catch (PDOException $e) {
+            die("Koneksi database gagal: " . $e->getMessage());
+        }
     }
     return $pdo;
 }
@@ -26,9 +36,9 @@ function is_logged_in() {
 function current_user() {
     if (!is_logged_in()) return null;
     return [
-        'id' => $_SESSION['user_id'],
+        'id'       => $_SESSION['user_id'],
         'username' => $_SESSION['username'],
-        'role' => $_SESSION['role'] ?? 'admin'
+        'role'     => $_SESSION['role'] ?? 'admin'
     ];
 }
 
@@ -50,12 +60,18 @@ function require_role($role) {
 
 function upload_image($file) {
     $allowed = ['image/jpeg','image/png','image/gif','image/webp'];
-    if ($file['error'] !== UPLOAD_ERR_OK) return [false, 'Upload error'];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return [false, 'Upload error'];
+    }
     $mime = mime_content_type($file['tmp_name']);
-    if (!in_array($mime, $allowed)) return [false, 'Tipe file tidak diperbolehkan'];
-    if ($file['size'] > 5 * 1024 * 1024) return [false, 'Maks 5MB'];
+    if (!in_array($mime, $allowed)) {
+        return [false, 'Tipe file tidak diperbolehkan'];
+    }
+    if ($file['size'] > 5 * 1024 * 1024) {
+        return [false, 'Maks 5MB'];
+    }
 
-    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $basename = bin2hex(random_bytes(8)) . '.' . $ext;
     $target = UPLOAD_DIR . $basename;
 
@@ -65,14 +81,18 @@ function upload_image($file) {
     return [true, $basename];
 }
 
-// pagination helper
+// Pagination helper
 function paginate($total, $perPage, $currentPage, $urlBase, $extraQuery = '') {
     $pages = ceil($total / $perPage);
+    if ($pages <= 1) return '';
+
     $html = '<nav><ul class="pagination">';
-    for ($i=1;$i<=$pages;$i++) {
+    for ($i = 1; $i <= $pages; $i++) {
         $active = $i == $currentPage ? ' active' : '';
         $q = $extraQuery ? '&' . $extraQuery : '';
-        $html .= '<li class="page-item' . $active . '"><a class="page-link" href="' . $urlBase . '?page=' . $i . $q . '">' . $i . '</a></li>';
+        $html .= '<li class="page-item' . $active . '">
+                    <a class="page-link" href="' . $urlBase . '?page=' . $i . $q . '">' . $i . '</a>
+                  </li>';
     }
     $html .= '</ul></nav>';
     return $html;

@@ -14,7 +14,8 @@ Skrip untuk screen recording - Galeri Foto (durasi ~4-6 menit)
 2. Tunjukkan pagination - pindah halaman
 3. Gunakan kolom pencarian untuk mencari judul foto
 4. Filter berdasarkan kategori
-5. Klik gambar -> tampilkan lightbox (modal) besar
+5. Klik gambar -> tampilkan lightbox (modal) 
+6. Fitur download.
 
 --- Demo Fitur - Admin (90-120s)
 1. Buka /login.php -> login sebagai admin
