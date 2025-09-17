@@ -11,6 +11,7 @@ $stats = [
 ];
 
 $photos = $pdo->query("SELECT p.*, c.name as category FROM photos p LEFT JOIN categories c ON p.category_id = c.id ORDER BY uploaded_at DESC LIMIT 50")->fetchAll();
+
 ?>
 <!doctype html>
 <html>
@@ -64,7 +65,14 @@ $photos = $pdo->query("SELECT p.*, c.name as category FROM photos p LEFT JOIN ca
   <div class="table-responsive">
     <table class="table table-striped">
       <thead>
-        <tr><th>#</th><th>Preview</th><th>Title</th><th>Kategori</th><th>Uploaded</th><th>Aksi</th></tr>
+        <tr>
+          <th>#</th>
+          <th>Preview</th>
+          <th>Title</th>
+          <th>Kategori</th>
+          <th>Uploaded</th>
+          <th>Aksi</th>
+        </tr>
       </thead>
       <tbody>
         <?php foreach($photos as $i => $p): ?>
