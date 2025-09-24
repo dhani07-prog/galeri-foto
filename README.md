@@ -40,3 +40,7 @@ screenshot
 ![dashboard admin](/docs/image-1.png)
 ![kelola kategori](/docs/image-2.png)
 ---
+
+## 📊 Flowchart
+
+Lihat flowchart di sini: [flowchart.md](./flowchart.md)
