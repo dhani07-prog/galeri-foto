@@ -36,7 +36,7 @@ Petunjuk singkat:
 screenshot 
 ---
 ![Gallery](/docs/gallery.PNG)
-![login](image.png)
+![login](/docs/image.png)
 ![dashboard admin](/docs/image-1.png)
 ![kelola kategori](/docs/image-2.png)
 ---
