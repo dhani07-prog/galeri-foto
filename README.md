@@ -14,7 +14,6 @@ Gallery Foto Komunitas adalah aplikasi berbasis web yang digunakan untuk mengelo
    Pagination: Menampilkan 12 foto per halaman agar lebih ringan.
    Download: Pengunjung bisa mengunduh foto langsung.
    Manajemen Admin: Admin dapat login, mengunggah, menghapus, dan mengatur foto.
-   User Roles: Mendukung peran pengguna (misalnya admin, user).
 
 Petunjuk singkat:
 1. Copy folder galeri-foto ke C:/laragon/www/
@@ -30,7 +29,6 @@ Petunjuk singkat:
    - Pencarian (by title) dan filter kategori di halaman publik.
    - Pagination (12 item per halaman).
    - Lightbox menggunakan Bootstrap Modal.
-   - Simple user roles (role di tabel users). Default admin dibuat lewat setup_admin.php.
    - Di halaman publik ada fitur download.
 
 screenshot 
