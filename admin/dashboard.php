@@ -10,7 +10,19 @@ $stats = [
     'users' => $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn(),
 ];
 
-$photos = $pdo->query("SELECT p.*, c.name as category FROM photos p LEFT JOIN categories c ON p.category_id = c.id ORDER BY uploaded_at DESC LIMIT 50")->fetchAll();
+// PAGINATION SETUP
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$perPage = 10;
+$offset = ($page - 1) * $perPage;
+
+$totalPhotos = $pdo->query("SELECT COUNT(*) FROM photos")->fetchColumn();
+$totalPages = ceil($totalPhotos / $perPage);
+
+$stmt = $pdo->prepare("SELECT p.*, c.name as category FROM photos p LEFT JOIN categories c ON p.category_id = c.id ORDER BY uploaded_at DESC LIMIT :limit OFFSET :offset");
+$stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$photos = $stmt->fetchAll();
 
 ?>
 <!doctype html>
@@ -77,7 +89,7 @@ $photos = $pdo->query("SELECT p.*, c.name as category FROM photos p LEFT JOIN ca
       <tbody>
         <?php foreach($photos as $i => $p): ?>
         <tr>
-          <td><?= $i+1 ?></td>
+          <td><?= ($offset + $i + 1) ?></td>
           <td><img src="<?= BASE_URL ?>/assets/uploads/<?= h($p['filename']) ?>" style="height:50px;object-fit:cover"></td>
           <td><?= h($p['title']) ?></td>
           <td><?= h($p['category'] ?? '-') ?></td>
@@ -91,6 +103,30 @@ $photos = $pdo->query("SELECT p.*, c.name as category FROM photos p LEFT JOIN ca
       </tbody>
     </table>
   </div>
+
+  <!-- PAGINATION NAV -->
+  <?php if($totalPages > 1): ?>
+  <nav>
+    <ul class="pagination">
+      <?php if($page > 1): ?>
+        <li class="page-item">
+          <a class="page-link" href="?page=<?= $page-1 ?>">&laquo; Prev</a>
+        </li>
+      <?php endif; ?>
+      <?php for($p=1; $p<=$totalPages; $p++): ?>
+        <li class="page-item <?= $p == $page ? 'active' : '' ?>">
+          <a class="page-link" href="?page=<?= $p ?>"><?= $p ?></a>
+        </li>
+      <?php endfor; ?>
+      <?php if($page < $totalPages): ?>
+        <li class="page-item">
+          <a class="page-link" href="?page=<?= $page+1 ?>">Next &raquo;</a>
+        </li>
+      <?php endif; ?>
+    </ul>
+  </nav>
+  <?php endif; ?>
+
 </div>
 </body>
 </html>
