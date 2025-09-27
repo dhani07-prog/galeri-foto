@@ -42,3 +42,11 @@ screenshot
 ## 📊 Flowchart
 
 Lihat flowchart di sini: [flowchart.md](./flowchart.md)
+
+---
+
+## FIGMA
+
+https://www.figma.com/design/Ux76Fj2bHvOxhnCC0i2mZb/Galeri-Foto---komunitas?node-id=0-1&t=XEW2Fmw8Pu5k3WhE-1
+
+
